@@ -48,6 +48,8 @@ Or after building:
 
 Use the printed hash as the value of `OPENCLAUDIO_ADMIN_PASSWORD_HASH`.
 
+`openclaudio` automatically loads `.env` from the current working directory. You do not need to `source` it before `make run`.
+
 ## Development
 
 Install frontend dependencies:
