@@ -1,0 +1,56 @@
+{{define "summary"}}
+<div class="panel-head">
+  <h2>OpenClaw summary</h2>
+  <p>Version, model, gateway state, and runtime health.</p>
+</div>
+{{if .Error}}
+  <p class="banner error">{{.Error}}</p>
+{{else}}
+  <div class="metric-grid">
+    <article class="metric-card">
+      <span>Version</span>
+      <strong>{{.Summary.Version}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Primary model</span>
+      <strong>{{.Summary.PrimaryModel}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Fallbacks</span>
+      <strong>{{if .Summary.FallbackModels}}{{range $i, $item := .Summary.FallbackModels}}{{if $i}}, {{end}}{{$item}}{{end}}{{else}}none{{end}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Gateway</span>
+      <strong>{{.Summary.GatewayBind}} : {{.Summary.GatewayPort}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Active sessions</span>
+      <strong>{{.Summary.ActiveSessionCount}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Service state</span>
+      <strong>{{if .Summary.Service.Available}}{{.Summary.Service.ActiveState}} / {{.Summary.Service.SubState}}{{else}}unavailable{{end}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>CPU</span>
+      <strong>{{if .Summary.Process.Available}}{{.Summary.Process.CPUPercent}}%{{else}}n/a{{end}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>RSS</span>
+      <strong>{{if .Summary.Process.Available}}{{humanKB .Summary.Process.RSSKB}}{{else}}n/a{{end}}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Elapsed</span>
+      <strong>{{if .Summary.Process.Available}}{{.Summary.Process.ElapsedSec}} s{{else}}n/a{{end}}</strong>
+    </article>
+  </div>
+  <div class="gateway-controls">
+    <button type="button" class="ghost" hx-post="/api/openclaw/gateway/start" hx-target="#gateway-action-result">Start</button>
+    <button type="button" class="ghost" hx-post="/api/openclaw/gateway/stop" hx-target="#gateway-action-result">Stop</button>
+    <button type="button" class="ghost" hx-post="/api/openclaw/gateway/restart" hx-target="#gateway-action-result">Restart</button>
+  </div>
+  <div id="gateway-action-result"></div>
+  {{if .Summary.Service.Error}}<p class="banner warn">{{.Summary.Service.Error}}</p>{{end}}
+  {{if .Summary.Process.Error}}<p class="banner warn">{{.Summary.Process.Error}}</p>{{end}}
+{{end}}
+{{end}}

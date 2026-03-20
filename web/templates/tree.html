@@ -1,0 +1,40 @@
+{{define "tree"}}
+<div class="tree-shell">
+  {{if .Error}}
+    <p class="banner error">{{.Error}}</p>
+  {{else if not .Nodes}}
+    <p class="muted">No files matched this view.</p>
+  {{else}}
+    <ul class="tree-list">
+      {{range .Nodes}}
+        <li class="tree-item">
+          {{if .IsDir}}
+            <button
+              class="tree-dir"
+              type="button"
+              hx-get="/api/tree?path={{urlquery .RelativePath}}"
+              hx-target="#{{.DOMID}}"
+              hx-swap="innerHTML"
+            >
+              <span>▸</span>
+              <span>{{.Name}}</span>
+            </button>
+            <div id="{{.DOMID}}" class="tree-branch"></div>
+          {{else}}
+            <a
+              class="tree-file {{if .IsMarkdown}}markdown{{end}}"
+              href="/files/{{.RelativePath}}"
+              hx-get="/api/file?path={{urlquery .RelativePath}}&view=split"
+              hx-target="#file-panel"
+              hx-push-url="true"
+            >
+              <span>{{if .IsMarkdown}}#{{else}}·{{end}}</span>
+              <span>{{.RelativePath}}</span>
+            </a>
+          {{end}}
+        </li>
+      {{end}}
+    </ul>
+  {{end}}
+</div>
+{{end}}

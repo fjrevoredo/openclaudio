@@ -1,0 +1,11 @@
+{{define "gateway-action"}}
+{{if .Result.Success}}
+  <p class="banner success">{{.Result.Action}} finished at {{fmtTime .Result.Timestamp}}</p>
+  {{if .Error}}<p class="banner warn">{{.Error}}</p>{{end}}
+  {{if .Result.Output}}<pre class="action-output">{{.Result.Output}}</pre>{{end}}
+{{else}}
+  <p class="banner error">{{.Result.Action}} failed at {{fmtTime .Result.Timestamp}}</p>
+  {{if .Error}}<p class="banner warn">{{.Error}}</p>{{end}}
+  {{if .Result.Output}}<pre class="action-output">{{.Result.Output}}</pre>{{end}}
+{{end}}
+{{end}}

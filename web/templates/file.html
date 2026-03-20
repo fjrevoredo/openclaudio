@@ -1,0 +1,61 @@
+{{define "file"}}
+{{if .Error}}
+  <p class="banner error">{{.Error}}</p>
+{{else}}
+  <div class="file-head">
+    <div>
+      <p class="eyebrow">File</p>
+      <h2>{{.Document.RelativePath}}</h2>
+      <p class="muted">{{humanBytes .Document.Size}} · {{fmtTime (timeFromNs .Document.LastModifiedNS)}}</p>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="ghost" hx-get="/api/file?path={{urlquery .Document.RelativePath}}&view=raw" hx-target="#file-panel">Raw</button>
+      <button type="button" class="ghost" hx-get="/api/file?path={{urlquery .Document.RelativePath}}&view=rendered" hx-target="#file-panel">Rendered</button>
+      <button type="button" class="ghost" hx-get="/api/file?path={{urlquery .Document.RelativePath}}&view=split" hx-target="#file-panel">Split</button>
+      <button type="button" class="ghost js-copy-path" data-kind="relative" data-path="{{.Document.RelativePath}}">Copy relative</button>
+      <button type="button" class="ghost js-copy-path" data-kind="relative_backticks" data-path="{{.Document.RelativePath}}">Copy code path</button>
+      <button type="button" class="ghost js-copy-path" data-kind="absolute" data-path="{{.Document.RelativePath}}">Copy absolute</button>
+      {{if not .Document.IsReadOnly}}
+        <button type="button" class="primary js-save-file" data-path="{{.Document.RelativePath}}">Save</button>
+      {{end}}
+      <button type="button" class="ghost" hx-get="/api/file?path={{urlquery .Document.RelativePath}}&view={{.Document.View}}" hx-target="#file-panel">Reload</button>
+    </div>
+  </div>
+
+  {{if .Document.InvalidUTF8}}
+    <p class="banner warn">This file is not valid UTF-8. v1 shows it as read-only.</p>
+  {{end}}
+
+  {{if .Document.InvalidUTF8}}
+    <div class="file-layout raw">
+      <section class="preview-pane">
+        <pre class="plain-preview">{{.Document.Text}}</pre>
+      </section>
+    </div>
+  {{else}}
+    <div class="file-layout {{.Document.View}}">
+      {{if ne .Document.View "rendered"}}
+        <section class="editor-pane">
+          <textarea
+            class="js-editor"
+            data-file-path="{{.Document.RelativePath}}"
+            data-last-modified="{{.Document.LastModifiedNS}}"
+            data-content-hash="{{.Document.ContentHash}}"
+            data-read-only="{{.Document.IsReadOnly}}"
+          >{{.Document.Text}}</textarea>
+        </section>
+      {{end}}
+      {{if ne .Document.View "raw"}}
+        <section class="preview-pane">
+          {{if .Document.IsMarkdown}}
+            <article class="markdown-body" id="preview-{{.Document.RelativePath}}">{{.RenderedHTML}}</article>
+          {{else}}
+            <pre class="plain-preview">{{.Document.Text}}</pre>
+          {{end}}
+        </section>
+      {{end}}
+    </div>
+  {{end}}
+  <div id="file-status" class="status-line"></div>
+{{end}}
+{{end}}

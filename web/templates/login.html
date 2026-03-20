@@ -1,0 +1,33 @@
+{{define "login"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>openclaudio · Login</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <p class="eyebrow">openclaudio</p>
+      <h1>Sign in</h1>
+      <p class="lede">Local workspace and gateway control for your OpenClaw host.</p>
+      {{if .Error}}<p class="banner error">{{.Error}}</p>{{end}}
+      <form method="post" action="/login" class="stack">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <label>
+          <span>Username</span>
+          <input type="text" name="username" autocomplete="username" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="primary">Log in</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
+{{end}}

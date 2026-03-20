@@ -1,0 +1,21 @@
+{{define "sessions"}}
+<div class="panel-head">
+  <h2>Recent sessions</h2>
+  <p>Sessions updated in the last 24 hours count as active.</p>
+</div>
+{{if .Error}}
+  <p class="banner error">{{.Error}}</p>
+{{else}}
+  <p class="statline"><strong>{{.Sessions.ActiveCount}}</strong> active in the last 24 hours</p>
+  <ul class="data-list">
+    {{range .Sessions.Recent}}
+      <li>
+        <strong>{{trimLabel .Label}}</strong>
+        <span>{{.Channel}} · {{fmtTime .UpdatedAt}}</span>
+      </li>
+    {{else}}
+      <li class="muted">No sessions found.</li>
+    {{end}}
+  </ul>
+{{end}}
+{{end}}

@@ -1,0 +1,14 @@
+[Unit]
+Description=openclaudio local panel
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/openclaudio
+EnvironmentFile=%h/.config/openclaudio/openclaudio.env
+ExecStart=%h/openclaudio/openclaudio
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

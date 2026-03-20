@@ -1,0 +1,84 @@
+{{define "index"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>openclaudio</title>
+  <meta name="csrf-token" content="{{.CSRFToken}}">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body class="app-shell" data-selected-path="{{.SelectedPath}}">
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">openclaudio</p>
+      <h1>Workspace and gateway panel</h1>
+    </div>
+    <div class="topbar-actions">
+      <span class="user-pill">{{.User}}</span>
+      <form method="post" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <button type="submit" class="ghost">Log out</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Workspace</h2>
+          <p>Browse and filter the OpenClaw workspace.</p>
+        </div>
+        <label class="search">
+          <span>Filter</span>
+          <input
+            type="search"
+            name="q"
+            placeholder="memory, md, scripts…"
+            hx-get="/api/tree"
+            hx-target="#tree-root"
+            hx-trigger="keyup changed delay:250ms"
+            hx-include="[name='q']"
+          >
+        </label>
+        <div id="tree-root" class="tree-root" hx-get="/api/tree" hx-trigger="load">
+          <p class="muted">Loading tree…</p>
+        </div>
+      </section>
+    </aside>
+
+    <section class="main-column">
+      <section class="panel">
+        <div id="file-panel" class="file-panel" {{if .SelectedPath}}hx-get="/api/file?path={{urlquery .SelectedPath}}&view=split" hx-trigger="load"{{end}}>
+          {{if .SelectedPath}}
+            <p class="muted">Loading file…</p>
+          {{else}}
+            <div class="empty-state">
+              <h2>Select a file</h2>
+              <p>Choose a markdown or text file from the workspace tree to view and edit it.</p>
+            </div>
+          {{end}}
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <section class="panel" id="summary-panel" hx-get="/api/openclaw/summary" hx-trigger="load">
+          <p class="muted">Loading summary…</p>
+        </section>
+        <section class="panel" id="sessions-panel" hx-get="/api/openclaw/sessions" hx-trigger="load">
+          <p class="muted">Loading sessions…</p>
+        </section>
+        <section class="panel" id="cron-panel" hx-get="/api/openclaw/cron" hx-trigger="load">
+          <p class="muted">Loading cron…</p>
+        </section>
+        <section class="panel" id="logs-panel" hx-get="/api/openclaw/logs" hx-trigger="load">
+          <p class="muted">Loading logs…</p>
+        </section>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
+{{end}}

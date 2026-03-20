@@ -1,0 +1,13 @@
+{{define "logs"}}
+<div class="panel-head">
+  <h2>Gateway logs</h2>
+  <p>Tail for {{.Date}}.</p>
+</div>
+{{if .Error}}
+  <p class="banner error">{{.Error}}</p>
+{{else}}
+  <pre class="log-tail">{{range .Lines}}{{.}}
+{{else}}No log lines found.
+{{end}}</pre>
+{{end}}
+{{end}}

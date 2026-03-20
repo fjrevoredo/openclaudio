@@ -1,0 +1,26 @@
+{{define "cron"}}
+<div class="panel-head">
+  <h2>Cron status</h2>
+  <p>Per-job latest status plus 24-hour success and error counts.</p>
+</div>
+{{if .Error}}
+  <p class="banner error">{{.Error}}</p>
+{{else}}
+  <div class="cron-list">
+    {{range .Cron.Jobs}}
+      <article class="cron-card">
+        <div class="cron-head">
+          <strong>{{.Name}}</strong>
+          <span>{{if .Enabled}}enabled{{else}}disabled{{end}}</span>
+        </div>
+        <p>{{.Schedule}} · {{.TimeZone}}</p>
+        <p>Last: {{.LastStatus}} · {{.LastDurationMS}} ms · {{fmtTime .LastRunAt}}</p>
+        <p>Next: {{fmtTime .NextRunAt}}</p>
+        <p>24h: {{.SuccessCount24h}} ok / {{.ErrorCount24h}} errors</p>
+      </article>
+    {{else}}
+      <p class="muted">No cron jobs found.</p>
+    {{end}}
+  </div>
+{{end}}
+{{end}}
