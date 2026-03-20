@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,11 +11,30 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fjrevoredo/openclaudio/internal/auth"
 	"github.com/fjrevoredo/openclaudio/internal/config"
 	webapp "github.com/fjrevoredo/openclaudio/internal/web"
 )
 
 func main() {
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "hash-password":
+			password, err := auth.ReadPasswordArgOrStdin(os.Args[2:])
+			if err != nil {
+				log.Fatalf("read password: %v", err)
+			}
+			hash, err := auth.HashPassword(password)
+			if err != nil {
+				log.Fatalf("hash password: %v", err)
+			}
+			fmt.Println(hash)
+			return
+		default:
+			log.Fatalf("unknown command: %s", os.Args[1])
+		}
+	}
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("load config: %v", err)

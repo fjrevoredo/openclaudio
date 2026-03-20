@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"bufio"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -9,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -35,6 +37,34 @@ func New(secret string) *Manager {
 
 func VerifyPassword(hash, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+}
+
+func HashPassword(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
+}
+
+func ReadPasswordArgOrStdin(args []string) (string, error) {
+	if len(args) > 0 {
+		password := strings.TrimSpace(args[0])
+		if password == "" {
+			return "", errors.New("password is required")
+		}
+		return password, nil
+	}
+	reader := bufio.NewReader(os.Stdin)
+	password, err := reader.ReadString('\n')
+	if err != nil && len(password) == 0 {
+		return "", err
+	}
+	password = strings.TrimSpace(password)
+	if password == "" {
+		return "", errors.New("password is required")
+	}
+	return password, nil
 }
 
 func (m *Manager) Login(w http.ResponseWriter, r *http.Request, username string) error {

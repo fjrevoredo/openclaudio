@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
 )
 
 const (
-	defaultPort         = 18890
-	defaultWorkspace    = "/home/francisco/.openclaw/workspace"
-	defaultOpenClawRoot = "/home/francisco/.openclaw"
-	defaultGatewayUnit  = "openclaw-gateway.service"
-	defaultLogDir       = "/tmp/openclaw"
+	defaultPort        = 18890
+	defaultGatewayUnit = "openclaw-gateway.service"
+	defaultLogDir      = "/tmp/openclaw"
 )
 
 type Config struct {
 	Port                int    `json:"port"`
+	BindAddress         string `json:"bindAddress"`
 	WorkspaceRoot       string `json:"workspaceRoot"`
 	OpenClawRoot        string `json:"openClawRoot"`
 	GatewayUnit         string `json:"gatewayUnit"`
@@ -31,8 +31,14 @@ type Config struct {
 }
 
 func Load() (Config, error) {
+	defaultOpenClawRoot, defaultWorkspace, err := defaultPaths()
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
 		Port:          defaultPort,
+		BindAddress:   "127.0.0.1",
 		WorkspaceRoot: defaultWorkspace,
 		OpenClawRoot:  defaultOpenClawRoot,
 		GatewayUnit:   defaultGatewayUnit,
@@ -52,8 +58,18 @@ func Load() (Config, error) {
 	return cfg, nil
 }
 
+func defaultPaths() (openClawRoot string, workspaceRoot string, err error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", "", fmt.Errorf("resolve user home: %w", err)
+	}
+	openClawRoot = filepath.Join(home, ".openclaw")
+	workspaceRoot = filepath.Join(openClawRoot, "workspace")
+	return openClawRoot, workspaceRoot, nil
+}
+
 func (c Config) ListenAddr() string {
-	return fmt.Sprintf("127.0.0.1:%d", c.Port)
+	return net.JoinHostPort(c.BindAddress, fmt.Sprintf("%d", c.Port))
 }
 
 func (c Config) HomeDir() string {
@@ -75,6 +91,9 @@ func (c *Config) normalize() error {
 
 	if c.LogDir == "" {
 		c.LogDir = defaultLogDir
+	}
+	if c.BindAddress == "" {
+		c.BindAddress = "127.0.0.1"
 	}
 
 	if c.Port < 1 || c.Port > 65535 {
@@ -130,6 +149,9 @@ func applyEnv(cfg *Config) {
 		if port, err := strconv.Atoi(v); err == nil {
 			cfg.Port = port
 		}
+	}
+	if v := os.Getenv("OPENCLAUDIO_BIND_ADDRESS"); v != "" {
+		cfg.BindAddress = v
 	}
 	if v := os.Getenv("OPENCLAUDIO_WORKSPACE_ROOT"); v != "" {
 		cfg.WorkspaceRoot = v

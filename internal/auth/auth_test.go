@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -40,5 +41,32 @@ func TestEnsureCSRFCookieHonorsForwardedProto(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("csrf cookie not set")
+	}
+}
+
+func TestHashPasswordRoundTrip(t *testing.T) {
+	hash, err := HashPassword("secret-pass")
+	if err != nil {
+		t.Fatalf("HashPassword() error = %v", err)
+	}
+	if err := VerifyPassword(hash, "secret-pass"); err != nil {
+		t.Fatalf("VerifyPassword() error = %v", err)
+	}
+}
+
+func TestReadPasswordArgOrStdinFromArg(t *testing.T) {
+	password, err := ReadPasswordArgOrStdin([]string{"secret-pass"})
+	if err != nil {
+		t.Fatalf("ReadPasswordArgOrStdin() error = %v", err)
+	}
+	if password != "secret-pass" {
+		t.Fatalf("password = %q, want secret-pass", password)
+	}
+}
+
+func TestReadPasswordArgOrStdinRejectsBlankArg(t *testing.T) {
+	_, err := ReadPasswordArgOrStdin([]string{"   "})
+	if err == nil || !strings.Contains(err.Error(), "password is required") {
+		t.Fatalf("error = %v, want password is required", err)
 	}
 }
