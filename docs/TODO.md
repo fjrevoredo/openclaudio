@@ -16,7 +16,7 @@ TODO entry format:
 ## High Priority
 
 - [ ] **Restrict split view to renderable files** (TODO-UI-SPLIT-RENDERABLE) — The split view must only be shown for files with a supported rendered preview, and unsupported file types must fall back to the single-pane editor/view experience without broken or empty preview states.
-- [ ] **Add basic GitHub CI** (TODO-CI-BASIC) — The repository must have a basic GitHub Actions CI workflow that runs on `push` and `pull_request` for the default branch, uses least-privilege permissions, enables concurrency cancellation for superseded runs, and validates the standard build and test path in line with `docs/CI_BEST_PRACTICES.md`.
+- [x] **Add basic GitHub CI** (TODO-CI-BASIC) — The repository must have a basic GitHub Actions CI workflow that runs on `push` and `pull_request` for the default branch, uses least-privilege permissions, enables concurrency cancellation for superseded runs, and validates the standard build and test path in line with `docs/CI_BEST_PRACTICES.md`.
 
 ---
 

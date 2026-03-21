@@ -18,7 +18,7 @@ Extended TODO Format
   - Relevant areas: `internal/files/`, `internal/web/`, `web/templates/file.html`, `web/static/src/app.js`
   - Current constraint: rendered preview support is currently markdown-focused, so availability should follow actual render support rather than file size or editor state alone.
 
-- [ ] **Add basic GitHub CI** (TODO-CI-BASIC) — The repository must have a basic GitHub Actions CI workflow that runs on `push` and `pull_request` for the default branch, uses least-privilege permissions, enables concurrency cancellation for superseded runs, and validates the standard build and test path in line with `docs/CI_BEST_PRACTICES.md`.
+- [x] **Add basic GitHub CI** (TODO-CI-BASIC) — The repository must have a basic GitHub Actions CI workflow that runs on `push` and `pull_request` for the default branch, uses least-privilege permissions, enables concurrency cancellation for superseded runs, and validates the standard build and test path in line with `docs/CI_BEST_PRACTICES.md`.
   - Relevant references: `docs/CI_BEST_PRACTICES.md`, `Makefile`, `package.json`
   - Initial scope should cover the standard verification path for this repo, including frontend asset build and Go tests.
 
