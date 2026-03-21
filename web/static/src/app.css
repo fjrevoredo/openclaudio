@@ -8,6 +8,19 @@
   --accent-strong: #094f42;
   --warn: #d94841;
   --success: #207548;
+  --markdown-raw-ink: #203127;
+  --markdown-gutter: #6c7868;
+  --markdown-heading-1: #0a5c4d;
+  --markdown-heading-2: #0d7c66;
+  --markdown-heading-3: #8f5f19;
+  --markdown-emphasis: #4c5f42;
+  --markdown-strong: #1a1f16;
+  --markdown-link: #0f6f76;
+  --markdown-code: #8a4622;
+  --markdown-quote: #6b715f;
+  --markdown-list: #9a702a;
+  --markdown-rule: #8e6a2f;
+  --markdown-marker: #8e7a65;
   --font-display: "Iowan Old Style", "Palatino Linotype", serif;
   --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
   --shadow: 0 18px 60px rgba(38, 41, 20, 0.14);
@@ -176,11 +189,22 @@ button.ghost {
 }
 .editor-host { min-height: 440px; }
 .cm-editor { height: 100%; min-height: 440px; }
+.editor-pane.markdown-source {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.95), rgba(247, 241, 228, 0.92));
+}
+.editor-pane.markdown-source .cm-editor {
+  color: var(--markdown-raw-ink);
+  background: transparent;
+}
 .markdown-body, .plain-preview, .log-tail {
   margin: 0;
   padding: 1rem;
   overflow: auto;
   white-space: pre-wrap;
+}
+.editor-pane.markdown-source .cm-focused {
+  outline: none;
 }
 .markdown-body h1, .markdown-body h2, .markdown-body h3 { margin-top: 0.25rem; }
 .status-line {

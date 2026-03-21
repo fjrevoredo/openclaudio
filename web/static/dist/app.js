@@ -18360,6 +18360,106 @@
       scope
     };
   }
+  function highlightTags(highlighters, tags3) {
+    let result = null;
+    for (let highlighter of highlighters) {
+      let value = highlighter.style(tags3);
+      if (value)
+        result = result ? result + " " + value : value;
+    }
+    return result;
+  }
+  function highlightTree(tree, highlighter, putStyle, from = 0, to = tree.length) {
+    let builder = new HighlightBuilder(from, Array.isArray(highlighter) ? highlighter : [highlighter], putStyle);
+    builder.highlightRange(tree.cursor(), from, to, "", builder.highlighters);
+    builder.flush(to);
+  }
+  var HighlightBuilder = class {
+    constructor(at, highlighters, span) {
+      this.at = at;
+      this.highlighters = highlighters;
+      this.span = span;
+      this.class = "";
+    }
+    startSpan(at, cls) {
+      if (cls != this.class) {
+        this.flush(at);
+        if (at > this.at)
+          this.at = at;
+        this.class = cls;
+      }
+    }
+    flush(to) {
+      if (to > this.at && this.class)
+        this.span(this.at, to, this.class);
+    }
+    highlightRange(cursor, from, to, inheritedClass, highlighters) {
+      let { type, from: start, to: end } = cursor;
+      if (start >= to || end <= from)
+        return;
+      if (type.isTop)
+        highlighters = this.highlighters.filter((h) => !h.scope || h.scope(type));
+      let cls = inheritedClass;
+      let rule = getStyleTags(cursor) || Rule.empty;
+      let tagCls = highlightTags(highlighters, rule.tags);
+      if (tagCls) {
+        if (cls)
+          cls += " ";
+        cls += tagCls;
+        if (rule.mode == 1)
+          inheritedClass += (inheritedClass ? " " : "") + tagCls;
+      }
+      this.startSpan(Math.max(from, start), cls);
+      if (rule.opaque)
+        return;
+      let mounted = cursor.tree && cursor.tree.prop(NodeProp.mounted);
+      if (mounted && mounted.overlay) {
+        let inner = cursor.node.enter(mounted.overlay[0].from + start, 1);
+        let innerHighlighters = this.highlighters.filter((h) => !h.scope || h.scope(mounted.tree.type));
+        let hasChild2 = cursor.firstChild();
+        for (let i = 0, pos = start; ; i++) {
+          let next = i < mounted.overlay.length ? mounted.overlay[i] : null;
+          let nextPos = next ? next.from + start : end;
+          let rangeFrom2 = Math.max(from, pos), rangeTo2 = Math.min(to, nextPos);
+          if (rangeFrom2 < rangeTo2 && hasChild2) {
+            while (cursor.from < rangeTo2) {
+              this.highlightRange(cursor, rangeFrom2, rangeTo2, inheritedClass, highlighters);
+              this.startSpan(Math.min(rangeTo2, cursor.to), cls);
+              if (cursor.to >= nextPos || !cursor.nextSibling())
+                break;
+            }
+          }
+          if (!next || nextPos > to)
+            break;
+          pos = next.to + start;
+          if (pos > from) {
+            this.highlightRange(inner.cursor(), Math.max(from, next.from + start), Math.min(to, pos), "", innerHighlighters);
+            this.startSpan(Math.min(to, pos), cls);
+          }
+        }
+        if (hasChild2)
+          cursor.parent();
+      } else if (cursor.firstChild()) {
+        if (mounted)
+          inheritedClass = "";
+        do {
+          if (cursor.to <= from)
+            continue;
+          if (cursor.from >= to)
+            break;
+          this.highlightRange(cursor, from, to, inheritedClass, highlighters);
+          this.startSpan(Math.min(to, cursor.to), cls);
+        } while (cursor.nextSibling());
+        cursor.parent();
+      }
+    }
+  };
+  function getStyleTags(node) {
+    let rule = node.type.prop(ruleNodeProp);
+    while (rule && rule.context && !node.matchContext(rule.context))
+      rule = rule.next;
+    return rule || null;
+  }
   var t = Tag.define;
   var comment = t();
   var name = t();
@@ -19695,6 +19795,68 @@
       return new _HighlightStyle(specs, options || {});
     }
   };
+  var highlighterFacet = /* @__PURE__ */ Facet.define();
+  var fallbackHighlighter = /* @__PURE__ */ Facet.define({
+    combine(values2) {
+      return values2.length ? [values2[0]] : null;
+    }
+  });
+  function getHighlighters(state) {
+    let main = state.facet(highlighterFacet);
+    return main.length ? main : state.facet(fallbackHighlighter);
+  }
+  function syntaxHighlighting(highlighter, options) {
+    let ext = [treeHighlighter], themeType;
+    if (highlighter instanceof HighlightStyle) {
+      if (highlighter.module)
+        ext.push(EditorView.styleModule.of(highlighter.module));
+      themeType = highlighter.themeType;
+    }
+    if (options === null || options === void 0 ? void 0 : options.fallback)
+      ext.push(fallbackHighlighter.of(highlighter));
+    else if (themeType)
+      ext.push(highlighterFacet.computeN([EditorView.darkTheme], (state) => {
+        return state.facet(EditorView.darkTheme) == (themeType == "dark") ? [highlighter] : [];
+      }));
+    else
+      ext.push(highlighterFacet.of(highlighter));
+    return ext;
+  }
+  var TreeHighlighter = class {
+    constructor(view) {
+      this.markCache = /* @__PURE__ */ Object.create(null);
+      this.tree = syntaxTree(view.state);
+      this.decorations = this.buildDeco(view, getHighlighters(view.state));
+      this.decoratedTo = view.viewport.to;
+    }
+    update(update) {
+      let tree = syntaxTree(update.state), highlighters = getHighlighters(update.state);
+      let styleChange = highlighters != getHighlighters(update.startState);
+      let { viewport } = update.view, decoratedToMapped = update.changes.mapPos(this.decoratedTo, 1);
+      if (tree.length < viewport.to && !styleChange && tree.type == this.tree.type && decoratedToMapped >= viewport.to) {
+        this.decorations = this.decorations.map(update.changes);
+        this.decoratedTo = decoratedToMapped;
+      } else if (tree != this.tree || update.viewportChanged || styleChange) {
+        this.tree = tree;
+        this.decorations = this.buildDeco(update.view, highlighters);
+        this.decoratedTo = viewport.to;
+      }
+    }
+    buildDeco(view, highlighters) {
+      if (!highlighters || !this.tree.length)
+        return Decoration.none;
+      let builder = new RangeSetBuilder();
+      for (let { from, to } of view.visibleRanges) {
+        highlightTree(this.tree, highlighters, (from2, to2, style) => {
+          builder.add(from2, to2, this.markCache[style] || (this.markCache[style] = Decoration.mark({ class: style })));
+        }, from, to);
+      }
+      return builder.finish();
+    }
+  };
+  var treeHighlighter = /* @__PURE__ */ Prec.high(/* @__PURE__ */ ViewPlugin.fromClass(TreeHighlighter, {
+    decorations: (v) => v.decorations
+  }));
   var defaultHighlightStyle = /* @__PURE__ */ HighlightStyle.define([
     {
       tag: tags.meta,
@@ -28344,6 +28506,59 @@
   // web/static/src/app.js
   window.htmx = htmx_esm_default;
   var editors = /* @__PURE__ */ new Map();
+  var markdownEditorTheme = EditorView.theme({
+    "&": {
+      backgroundColor: "transparent",
+      color: "var(--markdown-raw-ink)"
+    },
+    ".cm-scroller": {
+      fontFamily: '"IBM Plex Mono", monospace',
+      lineHeight: "1.65"
+    },
+    ".cm-gutters": {
+      backgroundColor: "rgba(248, 243, 233, 0.92)",
+      color: "var(--markdown-gutter)",
+      borderRight: "1px solid rgba(13, 124, 102, 0.12)"
+    },
+    ".cm-content, .cm-gutter": {
+      paddingTop: "1rem",
+      paddingBottom: "1rem"
+    },
+    ".cm-content": {
+      caretColor: "var(--accent-strong)"
+    },
+    ".cm-line": {
+      paddingLeft: "0.65rem",
+      paddingRight: "1rem"
+    },
+    ".cm-activeLine": {
+      backgroundColor: "rgba(13, 124, 102, 0.08)"
+    },
+    ".cm-activeLineGutter": {
+      backgroundColor: "rgba(13, 124, 102, 0.1)",
+      color: "var(--markdown-heading-2)"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+      backgroundColor: "rgba(13, 124, 102, 0.18)"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      borderLeftColor: "var(--accent-strong)"
+    }
+  });
+  var markdownHighlight = HighlightStyle.define([
+    { tag: tags.heading1, color: "var(--markdown-heading-1)", fontWeight: "700" },
+    { tag: tags.heading2, color: "var(--markdown-heading-2)", fontWeight: "700" },
+    { tag: [tags.heading3, tags.heading4], color: "var(--markdown-heading-3)", fontWeight: "700" },
+    { tag: [tags.heading5, tags.heading6, tags.heading], color: "var(--accent-strong)", fontWeight: "600" },
+    { tag: tags.emphasis, color: "var(--markdown-emphasis)", fontStyle: "italic" },
+    { tag: tags.strong, color: "var(--markdown-strong)", fontWeight: "700" },
+    { tag: [tags.link, tags.url], color: "var(--markdown-link)", textDecoration: "underline" },
+    { tag: [tags.monospace], color: "var(--markdown-code)", fontFamily: '"IBM Plex Mono", monospace' },
+    { tag: tags.quote, color: "var(--markdown-quote)", fontStyle: "italic" },
+    { tag: tags.list, color: "var(--markdown-list)", fontWeight: "600" },
+    { tag: tags.contentSeparator, color: "var(--markdown-rule)", fontWeight: "700" },
+    { tag: tags.processingInstruction, color: "var(--markdown-marker)" }
+  ]);
   function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? "";
   }
@@ -28373,25 +28588,30 @@
   function initEditor(textarea) {
     if (textarea.dataset.cmReady === "true") return;
     const readOnly2 = textarea.dataset.readOnly === "true";
+    const isMarkdown = textarea.dataset.markdown === "true";
     const host = document.createElement("div");
-    host.className = "editor-host";
+    host.className = isMarkdown ? "editor-host markdown-editor" : "editor-host";
     textarea.parentNode.insertBefore(host, textarea);
     textarea.hidden = true;
+    const extensions2 = [
+      lineNumbers(),
+      history2(),
+      keymap.of([...defaultKeymap, ...historyKeymap]),
+      markdown(),
+      EditorView.lineWrapping,
+      EditorView.editable.of(!readOnly2),
+      EditorView.updateListener.of((update) => {
+        if (!update.docChanged) return;
+        textarea.value = update.state.doc.toString();
+        syncDirty(textarea);
+      })
+    ];
+    if (isMarkdown) {
+      extensions2.push(markdownEditorTheme, syntaxHighlighting(markdownHighlight));
+    }
     const state = EditorState.create({
       doc: textarea.value,
-      extensions: [
-        lineNumbers(),
-        history2(),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
-        markdown(),
-        EditorView.lineWrapping,
-        EditorView.editable.of(!readOnly2),
-        EditorView.updateListener.of((update) => {
-          if (!update.docChanged) return;
-          textarea.value = update.state.doc.toString();
-          syncDirty(textarea);
-        })
-      ]
+      extensions: extensions2
     });
     const view = new EditorView({ state, parent: host });
     editors.set(textarea, { view, initial: textarea.value });

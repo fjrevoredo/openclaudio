@@ -33,14 +33,15 @@
       </section>
     </div>
   {{else}}
-    <div class="file-layout {{.Document.View}}">
+    <div class="file-layout {{.Document.View}} {{if .Document.IsMarkdown}}is-markdown{{end}}">
       {{if ne .Document.View "rendered"}}
-        <section class="editor-pane">
+        <section class="editor-pane{{if .Document.IsMarkdown}} markdown-source{{end}}">
           <textarea
-            class="js-editor"
+            class="js-editor{{if .Document.IsMarkdown}} markdown-editor{{end}}"
             data-file-path="{{.Document.RelativePath}}"
             data-last-modified="{{.Document.LastModifiedNS}}"
             data-content-hash="{{.Document.ContentHash}}"
+            data-markdown="{{.Document.IsMarkdown}}"
             data-read-only="{{.Document.IsReadOnly}}"
           >{{.Document.Text}}</textarea>
         </section>

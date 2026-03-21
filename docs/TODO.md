@@ -22,7 +22,7 @@ TODO entry format:
 
 ## Medium Priority
 
-- [ ] **Add color scheme for raw markdown display** (TODO-UI-MARKDOWN-RAW-COLOR) — Raw markdown content must use a deliberate color scheme that improves readability and visual hierarchy while remaining consistent with the existing UI and preserving legibility in the editor/view experience.
+- [x] **Add color scheme for raw markdown display** (TODO-UI-MARKDOWN-RAW-COLOR) — Raw markdown content must use a deliberate color scheme that improves readability and visual hierarchy while remaining consistent with the existing UI and preserving legibility in the editor/view experience.
 
 ---
 

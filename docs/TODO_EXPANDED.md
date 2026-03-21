@@ -26,7 +26,7 @@ Extended TODO Format
 
 ## Medium Priority
 
-- [ ] **Add color scheme for raw markdown display** (TODO-UI-MARKDOWN-RAW-COLOR) — Raw markdown content must use a deliberate color scheme that improves readability and visual hierarchy while remaining consistent with the existing UI and preserving legibility in the editor/view experience.
+- [x] **Add color scheme for raw markdown display** (TODO-UI-MARKDOWN-RAW-COLOR) — Raw markdown content must use a deliberate color scheme that improves readability and visual hierarchy while remaining consistent with the existing UI and preserving legibility in the editor/view experience.
   - Relevant areas: `web/templates/file.html`, `web/static/src/app.css`, `web/static/src/app.js`
   - Scope note: this is about the raw markdown presentation, not changing the rendered markdown theme independently unless the design requires shared tokens.
 
