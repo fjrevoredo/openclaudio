@@ -29,6 +29,6 @@ TODO entry format:
 
 ## Low Priority / Future
 
-- [ ] **Migrate frontend package management to pnpm** (TODO-TOOLING-PNPM-MIGRATION) — The project must use `pnpm` as the primary JavaScript package manager, with repository scripts, lockfiles, CI expectations, and contributor documentation updated so installs and builds are reproducible without relying on `npm`.
+- [x] **Migrate frontend package management to pnpm** (TODO-TOOLING-PNPM-MIGRATION) — The project must use `pnpm` as the primary JavaScript package manager, with repository scripts, lockfiles, CI expectations, and contributor documentation updated so installs and builds are reproducible without relying on `npm`.
 
 --

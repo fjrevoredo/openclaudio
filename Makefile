@@ -5,7 +5,7 @@ GOPATH ?= /tmp/openclaudio-gopath
 .PHONY: frontend-build build test run
 
 frontend-build:
-	npm run build
+	pnpm run build
 
 build: frontend-build
 	mkdir -p $(GOCACHE) $(GOPATH)

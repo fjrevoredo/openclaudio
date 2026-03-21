@@ -34,6 +34,6 @@ Extended TODO Format
 
 ## Low Priority / Future
 
-- [ ] **Migrate frontend package management to pnpm** (TODO-TOOLING-PNPM-MIGRATION) — The project must use `pnpm` as the primary JavaScript package manager, with repository scripts, lockfiles, CI expectations, and contributor documentation updated so installs and builds are reproducible without relying on `npm`.
+- [x] **Migrate frontend package management to pnpm** (TODO-TOOLING-PNPM-MIGRATION) — The project must use `pnpm` as the primary JavaScript package manager, with repository scripts, lockfiles, CI expectations, and contributor documentation updated so installs and builds are reproducible without relying on `npm`.
   - Relevant areas: `package.json`, lockfiles, `README.md`, `AGENTS.md`, CI workflow files
   - Migration is lower priority than current product and CI behavior work because it is mostly tooling churn unless paired with a broader dependency-management change.

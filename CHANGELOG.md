@@ -11,3 +11,7 @@ Entry: - `- **Change title** — concise changelog entry description with scope 
 # Logs
 
 ## [0.0.1] - Unreleased
+
+### Changed
+
+- **migrate frontend package management to pnpm** — Switched repository frontend tooling, lockfile expectations, and contributor docs from npm to pnpm with a pinned pnpm version and Corepack-based setup guidance. (TODO-TOOLING-PNPM-MIGRATION)

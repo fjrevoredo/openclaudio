@@ -109,9 +109,9 @@ jobs:
 ```yaml
 - uses: actions/cache@v4
   with:
-    path: ~/.npm
-    key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-    restore-keys: ${{ runner.os }}-npm-
+    path: ~/.local/share/pnpm/store
+    key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+    restore-keys: ${{ runner.os }}-pnpm-
 ```
 
 - **Key on the lockfile hash** — cache busts automatically when deps change
@@ -119,7 +119,8 @@ jobs:
 - **Always install with a frozen/locked flag** to prevent silent dep drift:
 
 ```bash
-npm ci                          # npm
+corepack enable
+pnpm install --frozen-lockfile  # pnpm
 yarn install --frozen-lockfile  # yarn
 bun install --frozen-lockfile   # bun
 pip install --require-hashes    # pip

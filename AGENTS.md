@@ -7,7 +7,7 @@
 - `web/templates/`: server-rendered HTML templates and HTMX partials.
 - `web/static/src/`: source JS/CSS for HTMX and CodeMirror behavior.
 - `web/static/dist/`: built assets embedded into the Go binary.
-- `tools/build.mjs`: frontend build script used by `npm run build`.
+- `tools/build.mjs`: frontend build script used by `pnpm run build`.
 - `docs/`: architecture, configuration, TODO, and planning notes.
 - `deploy/systemd/`: example user service unit.
 - `.agents/skills/` and `.claude/skills/`: checked-in skill definitions for agent workflows.
@@ -17,8 +17,9 @@ Keep new code inside `internal/` unless it is a public entrypoint or embedded as
 
 ## Build, Test, and Development Commands
 
-- `npm install`: install frontend dependencies.
-- `npm run build`: bundle `web/static/src/*` into `web/static/dist/*`.
+- `corepack enable`: activate Corepack-managed package managers for local development.
+- `pnpm install`: install frontend dependencies.
+- `pnpm run build`: bundle `web/static/src/*` into `web/static/dist/*`.
 - `make frontend-build`: rebuild frontend assets only.
 - `make build`: build assets and compile the `openclaudio` binary.
 - `make test`: run the Go test suite.
@@ -39,7 +40,7 @@ The app auto-loads `.env` from the repo root during local development.
 - Use the standard Go `testing` package.
 - Place tests next to the code they cover, using `*_test.go`.
 - Prefer focused unit tests for config loading, auth/session behavior, file/path safety, OpenClaw service behavior, and HTTP handlers.
-- Run `make test` before opening a PR. If you touch frontend assets, also run `npm run build`.
+- Run `make test` before opening a PR. If you touch frontend assets, also run `pnpm run build`.
 
 ## Commit & Pull Request Guidelines
 

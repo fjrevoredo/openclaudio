@@ -13,7 +13,7 @@ Lightweight Go web panel for daily OpenClaw management.
 ## Requirements
 
 - Go
-- npm
+- Node.js with Corepack enabled
 - a local OpenClaw install rooted at `~/.openclaw`
 
 ## Configuration
@@ -55,7 +55,8 @@ Use the printed hash as the value of `OPENCLAUDIO_ADMIN_PASSWORD_HASH`.
 Install frontend dependencies:
 
 ```bash
-npm install
+corepack enable
+pnpm install
 ```
 
 Build assets and the Go binary:
@@ -100,7 +101,7 @@ When the app is exposed directly over plain HTTP on a LAN, browser cookies canno
 ## Verification
 
 ```bash
-npm run build
+pnpm run build
 make test
 ```
 
