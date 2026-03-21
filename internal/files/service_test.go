@@ -98,3 +98,34 @@ func TestInvalidUTF8FilesAreReadOnly(t *testing.T) {
 		t.Fatalf("Save() error = %v, want invalid UTF-8 rejection", err)
 	}
 }
+
+func TestAbsolutePathsAreRejected(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "note.md")
+	if err := os.WriteFile(path, []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	svc, err := New(dir, markdown.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := svc.Read("/note.md", "raw"); err == nil || err.Error() != "absolute paths are not allowed" {
+		t.Fatalf("Read() error = %v, want absolute path rejection", err)
+	}
+
+	if _, err := svc.CopyPath("/note.md", "relative"); err == nil || err.Error() != "absolute paths are not allowed" {
+		t.Fatalf("CopyPath() error = %v, want absolute path rejection", err)
+	}
+
+	_, err = svc.Save(SaveRequest{
+		RelativePath:   "/note.md",
+		Text:           "replacement",
+		LastModifiedNS: 0,
+		ContentHash:    "",
+	})
+	if err == nil || err.Error() != "absolute paths are not allowed" {
+		t.Fatalf("Save() error = %v, want absolute path rejection", err)
+	}
+}

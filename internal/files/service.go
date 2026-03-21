@@ -325,8 +325,11 @@ func (s *Service) resolveExisting(rel string) (string, error) {
 }
 
 func cleanRelative(rel string) (string, error) {
-	if rel == "" || rel == "." || rel == "/" {
+	if rel == "" || rel == "." {
 		return "", nil
+	}
+	if path.IsAbs(rel) {
+		return "", errors.New("absolute paths are not allowed")
 	}
 	clean := path.Clean("/" + rel)
 	clean = strings.TrimPrefix(clean, "/")

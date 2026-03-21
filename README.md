@@ -95,6 +95,8 @@ An example user service is in `deploy/systemd/openclaudio.service`.
 
 The app is intended for localhost or trusted intranet use. Secure cookies are enabled when the request is HTTPS, including when HTTPS is terminated by a reverse proxy that forwards the protocol correctly.
 
+When the app is exposed directly over plain HTTP on a LAN, browser cookies cannot be marked `Secure`. If you need strict secure-cookie behavior, put the app behind HTTPS.
+
 ## Verification
 
 ```bash
